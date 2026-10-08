@@ -18,6 +18,26 @@ function today() { return new Date().toISOString().slice(0, 10); }
 function formatMoney(value) { return money.format(Number(value) || 0); }
 function escapeHtml(value) { return String(value).replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" }[char])); }
 function showMessage(message, isError = true) { $("authMessage").textContent = message; $("authMessage").style.color = isError ? "#a84e4e" : "#2f8a66"; }
+function movement(rows) { return rows.reduce((sum, row) => sum + ((Number(row.amount) || 0) * (row.type === "income" ? 1 : -1)), 0); }
+function documentEnding(doc) {
+  if (doc.ending_balance !== null && doc.ending_balance !== undefined) return Number(doc.ending_balance) || 0;
+  return (Number(doc.opening_balance) || 0) + movement((doc.operations || []).map((row) => ({ type: row.operation_type, amount: row.amount })));
+}
+function previousDocument() {
+  const organization = $("organization").value.trim();
+  const personName = $("personName").value.trim();
+  const date = $("documentDate").value || today();
+  if (!organization || !personName) return null;
+  return savedDocuments.filter((doc) => doc.id !== currentDocumentId && doc.organization === organization && doc.person_name === personName && doc.document_date <= date)
+    .sort((a, b) => `${b.document_date}T${b.created_at || b.updated_at || ""}`.localeCompare(`${a.document_date}T${a.created_at || a.updated_at || ""}`))[0] || null;
+}
+function syncOpeningBalance() {
+  const previous = previousDocument();
+  const input = $("openingBalance");
+  input.readOnly = Boolean(previous);
+  if (previous) input.value = documentEnding(previous).toFixed(2);
+  update();
+}
 function getData() {
   return {
     fields: Object.fromEntries(fields.map((id) => [id, $(id).value])),
@@ -38,11 +58,11 @@ function addRow(data = {}) {
 function update() {
   const data = getData();
   const opening = Number(data.fields.openingBalance) || 0;
-  const movement = data.rows.reduce((sum, row) => sum + ((Number(row.amount) || 0) * (row.type === "income" ? 1 : -1)), 0);
-  const total = movement;
+  const netMovement = movement(data.rows);
+  const total = netMovement;
   $("totalAmount").textContent = formatMoney(total);
   $("tableTotal").textContent = formatMoney(total);
-  const ending = opening + movement;
+  const ending = opening + netMovement;
   $("endingBalance").textContent = formatMoney(ending);
   $("operationCount").textContent = data.rows.length;
   $("emptyState").hidden = data.rows.length > 0;
@@ -70,7 +90,7 @@ function renderSavedDocuments() {
 async function loadDocuments() {
   const { data, error } = await supabaseClient.from("documents").select("*, operations(*)").order("updated_at", { ascending: false });
   if (error) { showMessage(`Ошибка загрузки документов: ${error.message}`); return; }
-  savedDocuments = (data || []).map((doc) => ({ ...doc, total: (doc.operations || []).reduce((sum, row) => sum + Number(row.amount || 0), 0) }));
+  savedDocuments = (data || []).map((doc) => ({ ...doc, ending_balance: documentEnding(doc), total: movement((doc.operations || []).map((row) => ({ type: row.operation_type, amount: row.amount }))) }));
   renderSavedDocuments();
 }
 
@@ -85,6 +105,7 @@ async function loadDocument(id) {
   $("openingBalance").value = document.opening_balance || "";
   body.innerHTML = "";
   (document.operations || []).forEach((row) => addRow({ date: row.operation_date, name: row.name, type: row.operation_type, amount: row.amount }));
+  syncOpeningBalance();
   update();
   $("savedPanel").hidden = true;
   window.scrollTo({ top: 0, behavior: "smooth" });
@@ -110,7 +131,8 @@ async function save() {
     documentNumber = `АВ-${String(maxNumber).padStart(4, "0")}`;
     $("documentNumber").value = documentNumber;
   }
-  const documentPayload = { user_id: user.id, document_number: documentNumber, number_value: Number(documentNumber.replace(/\D/g, "")) || 1, document_date: data.fields.documentDate || today(), organization: data.fields.organization || null, person_name: data.fields.personName || null, opening_balance: Number(data.fields.openingBalance) || 0, updated_at: new Date().toISOString() };
+  const endingBalance = (Number(data.fields.openingBalance) || 0) + movement(data.rows);
+  const documentPayload = { user_id: user.id, document_number: documentNumber, number_value: Number(documentNumber.replace(/\D/g, "")) || 1, document_date: data.fields.documentDate || today(), organization: data.fields.organization || null, person_name: data.fields.personName || null, opening_balance: Number(data.fields.openingBalance) || 0, ending_balance: endingBalance, updated_at: new Date().toISOString() };
   let result;
   if (documentId) result = await supabaseClient.from("documents").update(documentPayload).eq("id", documentId).select().single();
   else result = await supabaseClient.from("documents").insert(documentPayload).select().single();
@@ -191,7 +213,7 @@ async function signUp() {
   }
 }
 
-fields.filter((id) => id !== "documentNumber").forEach((id) => $(id).addEventListener("input", update));
+fields.filter((id) => id !== "documentNumber").forEach((id) => $(id).addEventListener("input", ["organization", "personName", "documentDate"].includes(id) ? syncOpeningBalance : update));
 $("addRowButton").addEventListener("click", () => addRow());
 $("saveButton").addEventListener("click", save);
 $("clearButton").addEventListener("click", clearForm);
