@@ -5,7 +5,7 @@ if (!window.supabase || typeof window.supabase.createClient !== "function") {
   if (message) message.textContent = "Не удалось загрузить библиотеку Supabase. Обновите страницу через Ctrl+F5.";
   throw new Error("Supabase library was not loaded");
 }
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 
 const money = new Intl.NumberFormat("ru-RU", { style: "currency", currency: "RUB", maximumFractionDigits: 2 });
 const $ = (id) => document.getElementById(id);
@@ -65,7 +65,7 @@ function renderSavedDocuments() {
 }
 
 async function loadDocuments() {
-  const { data, error } = await supabase.from("documents").select("*, operations(*)").order("updated_at", { ascending: false });
+  const { data, error } = await supabaseClient.from("documents").select("*, operations(*)").order("updated_at", { ascending: false });
   if (error) { showMessage(`Ошибка загрузки документов: ${error.message}`); return; }
   savedDocuments = (data || []).map((doc) => ({ ...doc, total: (doc.operations || []).reduce((sum, row) => sum + Number(row.amount || 0), 0) }));
   renderSavedDocuments();
@@ -89,7 +89,7 @@ async function loadDocument(id) {
 
 async function save() {
   const data = getData();
-  const user = (await supabase.auth.getUser()).data.user;
+  const user = (await supabaseClient.auth.getUser()).data.user;
   if (!user) return showMessage("Сначала войдите в аккаунт.");
   let documentId = currentDocumentId;
   let documentNumber = $("documentNumber").value;
@@ -100,15 +100,15 @@ async function save() {
   }
   const documentPayload = { user_id: user.id, document_number: documentNumber, number_value: Number(documentNumber.replace(/\D/g, "")) || 1, document_date: data.fields.documentDate || today(), organization: data.fields.organization || null, person_name: data.fields.personName || null, opening_balance: Number(data.fields.openingBalance) || 0, updated_at: new Date().toISOString() };
   let result;
-  if (documentId) result = await supabase.from("documents").update(documentPayload).eq("id", documentId).select().single();
-  else result = await supabase.from("documents").insert(documentPayload).select().single();
+  if (documentId) result = await supabaseClient.from("documents").update(documentPayload).eq("id", documentId).select().single();
+  else result = await supabaseClient.from("documents").insert(documentPayload).select().single();
   if (result.error) return showMessage(`Ошибка сохранения документа: ${result.error.message}`);
   documentId = result.data.id;
   currentDocumentId = documentId;
-  await supabase.from("operations").delete().eq("document_id", documentId);
+  await supabaseClient.from("operations").delete().eq("document_id", documentId);
   const operations = data.rows.filter((row) => row.name || Number(row.amount)).map((row) => ({ document_id: documentId, user_id: user.id, operation_date: row.date || today(), name: row.name || "", amount: Number(row.amount) || 0 }));
   if (operations.length) {
-    const operationResult = await supabase.from("operations").insert(operations);
+    const operationResult = await supabaseClient.from("operations").insert(operations);
     if (operationResult.error) return showMessage(`Документ сохранён, но операции не записались: ${operationResult.error.message}`);
   }
   $("saveState").textContent = `Сохранено · ${documentNumber}`;
@@ -117,7 +117,7 @@ async function save() {
 
 async function deleteDocument(id) {
   if (!confirm("Удалить сохранённый документ?")) return;
-  const { error } = await supabase.from("documents").delete().eq("id", id);
+  const { error } = await supabaseClient.from("documents").delete().eq("id", id);
   if (error) return showMessage(`Ошибка удаления: ${error.message}`);
   if (currentDocumentId === id) clearForm(false);
   await loadDocuments();
@@ -128,7 +128,7 @@ function clearForm(ask = true) { if (ask && !confirm("Очистить доку�
 async function enterApp() {
   $("authPanel").hidden = true;
   $("appContent").hidden = false;
-  if (!$("signOutButton")) { const button = document.createElement("button"); button.id = "signOutButton"; button.className = "button button-ghost"; button.textContent = "Выйти"; button.addEventListener("click", () => supabase.auth.signOut()); $("topbarActions").appendChild(button); }
+  if (!$("signOutButton")) { const button = document.createElement("button"); button.id = "signOutButton"; button.className = "button button-ghost"; button.textContent = "Выйти"; button.addEventListener("click", () => supabaseClient.auth.signOut()); $("topbarActions").appendChild(button); }
   $("documentDate").value = today();
   await loadDocuments();
   update();
@@ -139,7 +139,7 @@ function leaveApp() { $("authPanel").hidden = false; $("appContent").hidden = tr
 async function signIn() {
   showMessage("Выполняю вход...", false);
   try {
-    const { error } = await supabase.auth.signInWithPassword({ email: $("authEmail").value.trim(), password: $("authPassword").value });
+    const { error } = await supabaseClient.auth.signInWithPassword({ email: $("authEmail").value.trim(), password: $("authPassword").value });
     if (error) showMessage(error.message);
   } catch (error) {
     showMessage(`Ошибка соединения: ${error.message || error}`);
@@ -153,7 +153,7 @@ async function signUp() {
     const password = $("authPassword").value;
     if (!email || !password) return showMessage("Введите email и пароль.");
     if (password.length < 6) return showMessage("Пароль должен содержать минимум 6 символов.");
-    const { data, error } = await supabase.auth.signUp({ email, password });
+    const { data, error } = await supabaseClient.auth.signUp({ email, password });
     if (error) return showMessage(error.message);
     showMessage(data.session ? "Аккаунт создан." : "Аккаунт создан. Проверьте почту для подтверждения.", false);
   } catch (error) {
@@ -169,5 +169,5 @@ $("documentsButton").addEventListener("click", () => { $("savedPanel").hidden = 
 $("signInButton").addEventListener("click", signIn);
 $("signUpButton").addEventListener("click", signUp);
 
-supabase.auth.onAuthStateChange((event, session) => { if (session) enterApp(); else leaveApp(); });
-supabase.auth.getSession().then(({ data }) => { if (data.session) enterApp(); else leaveApp(); });
+supabaseClient.auth.onAuthStateChange((event, session) => { if (session) enterApp(); else leaveApp(); });
+supabaseClient.auth.getSession().then(({ data }) => { if (data.session) enterApp(); else leaveApp(); });
