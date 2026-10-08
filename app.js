@@ -21,15 +21,16 @@ function showMessage(message, isError = true) { $("authMessage").textContent = m
 function getData() {
   return {
     fields: Object.fromEntries(fields.map((id) => [id, $(id).value])),
-    rows: [...body.querySelectorAll("tr")].map((row) => ({ date: row.querySelector(".operation-date").value, name: row.querySelector(".operation-name").value, amount: row.querySelector(".operation-amount").value }))
+    rows: [...body.querySelectorAll("tr")].map((row) => ({ date: row.querySelector(".operation-date").value, name: row.querySelector(".operation-name").value, type: row.querySelector(".operation-type").value, amount: row.querySelector(".operation-amount").value }))
   };
 }
 
 function addRow(data = {}) {
   const row = document.createElement("tr");
-  row.innerHTML = `<td><input type="date" class="operation-date" value="${data.date || today()}"></td><td><input type="text" class="operation-name" placeholder="Например, закупка материалов" value="${escapeHtml(data.name || "")}"></td><td><input type="number" class="operation-amount" min="0" step="0.01" placeholder="0" value="${data.amount ?? ""}"></td><td><button class="remove-row" type="button" title="Удалить строку">×</button></td>`;
+  row.innerHTML = `<td><input type="date" class="operation-date" value="${data.date || today()}"></td><td><input type="text" class="operation-name" placeholder="Например, закупка материалов" value="${escapeHtml(data.name || "")}"></td><td><select class="operation-type"><option value="expense"${(data.type || "expense") === "expense" ? " selected" : ""}>Расход</option><option value="income"${data.type === "income" ? " selected" : ""}>Приход</option></select></td><td><input type="number" class="operation-amount" min="0" step="0.01" placeholder="0" value="${data.amount ?? ""}"></td><td><button class="remove-row" type="button" title="Удалить строку">×</button></td>`;
   body.appendChild(row);
-  row.querySelectorAll("input").forEach((input) => input.addEventListener("input", update));
+  row.querySelectorAll("input, select").forEach((input) => input.addEventListener("input", update));
+  row.querySelector(".operation-type").addEventListener("change", update);
   row.querySelector(".remove-row").addEventListener("click", () => { row.remove(); update(); });
   update();
 }
@@ -38,9 +39,12 @@ function update() {
   const data = getData();
   const total = data.rows.reduce((sum, row) => sum + (Number(row.amount) || 0), 0);
   const opening = Number(data.fields.openingBalance) || 0;
+  const movement = data.rows.reduce((sum, row) => sum + ((Number(row.amount) || 0) * (row.type === "income" ? 1 : -1)), 0);
   $("totalAmount").textContent = formatMoney(total);
   $("tableTotal").textContent = formatMoney(total);
-  $("endingBalance").textContent = formatMoney(opening + total);
+  const ending = opening + movement;
+  $("endingBalance").textContent = formatMoney(ending);
+  $("endingBalanceField").value = ending.toFixed(2);
   $("operationCount").textContent = data.rows.length;
   $("emptyState").hidden = data.rows.length > 0;
   $("saveState").textContent = currentDocumentId ? "Есть несохранённые изменения" : "Новый документ";
@@ -81,7 +85,7 @@ async function loadDocument(id) {
   $("personName").value = document.person_name || "";
   $("openingBalance").value = document.opening_balance || "";
   body.innerHTML = "";
-  (document.operations || []).forEach((row) => addRow({ date: row.operation_date, name: row.name, amount: row.amount }));
+  (document.operations || []).forEach((row) => addRow({ date: row.operation_date, name: row.name, type: row.operation_type, amount: row.amount }));
   update();
   $("savedPanel").hidden = true;
   window.scrollTo({ top: 0, behavior: "smooth" });
@@ -106,7 +110,7 @@ async function save() {
   documentId = result.data.id;
   currentDocumentId = documentId;
   await supabaseClient.from("operations").delete().eq("document_id", documentId);
-  const operations = data.rows.filter((row) => row.name || Number(row.amount)).map((row) => ({ document_id: documentId, user_id: user.id, operation_date: row.date || today(), name: row.name || "", amount: Number(row.amount) || 0 }));
+  const operations = data.rows.filter((row) => row.name || Number(row.amount)).map((row) => ({ document_id: documentId, user_id: user.id, operation_date: row.date || today(), name: row.name || "", operation_type: row.type || "expense", amount: Number(row.amount) || 0 }));
   if (operations.length) {
     const operationResult = await supabaseClient.from("operations").insert(operations);
     if (operationResult.error) return showMessage(`Документ сохранён, но операции не записались: ${operationResult.error.message}`);

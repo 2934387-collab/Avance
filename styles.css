@@ -42,7 +42,7 @@ h1, h2, p { margin-top: 0; } h1 { margin-bottom: 9px; font-size: clamp(28px, 4vw
 input { width: 100%; min-width: 0; padding: 12px 13px; border: 1px solid var(--line); border-radius: 9px; outline: none; color: var(--ink); background: #fcfcfd; font: inherit; font-size: 14px; font-weight: 500; } input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px #e9a83b22; }
 input[readonly] { color: var(--muted); background: #f4f6f7; }
 .table-wrap { overflow-x: auto; } table { width: 100%; border-collapse: collapse; } th { padding: 0 12px 12px; color: var(--muted); font-size: 11px; font-weight: 750; text-align: left; text-transform: uppercase; letter-spacing: .08em; } td { padding: 12px; border-top: 1px solid var(--line); } td:first-child, th:first-child { padding-left: 0; } td:last-child, th:last-child { padding-right: 0; }
-.date-column { width: 165px; } .amount-column { width: 180px; } .action-column { width: 45px; } td input { background: #fff; }
+.date-column { width: 165px; } .type-column { width: 145px; } .amount-column { width: 180px; } .action-column { width: 45px; } td input, td select { background: #fff; }
 .remove-row { width: 30px; height: 30px; border: 0; border-radius: 8px; color: #a0a8b0; background: transparent; cursor: pointer; font-size: 20px; } .remove-row:hover { color: #b34a4a; background: #fff0f0; }
 .empty-state { padding: 28px 0 15px; color: var(--muted); font-size: 14px; text-align: center; } .table-footer { display: flex; justify-content: flex-end; gap: 68px; padding-top: 19px; margin-top: 9px; border-top: 1px solid var(--line); font-size: 14px; } .table-footer strong { min-width: 112px; text-align: right; }
 .saved-list { display: grid; gap: 9px; }
