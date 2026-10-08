@@ -1,5 +1,10 @@
 const SUPABASE_URL = "https://sgwhxfvcqcfwewekhspw.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_gaeh2owrgPYET5iof4jJ4w_ghxPcksQ";
+if (!window.supabase || typeof window.supabase.createClient !== "function") {
+  const message = document.getElementById("authMessage");
+  if (message) message.textContent = "Не удалось загрузить библиотеку Supabase. Обновите страницу через Ctrl+F5.";
+  throw new Error("Supabase library was not loaded");
+}
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 
 const money = new Intl.NumberFormat("ru-RU", { style: "currency", currency: "RUB", maximumFractionDigits: 2 });
