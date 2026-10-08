@@ -35,8 +35,12 @@ function syncOpeningBalance() {
   const previous = previousDocument();
   const input = $("openingBalance");
   input.readOnly = Boolean(previous);
-  if (previous) input.value = documentEnding(previous).toFixed(2);
+  if (previous) {
+    input.value = documentEnding(previous).toFixed(2);
+    $("saveState").textContent = `Остаток из документа ${previous.document_number}`;
+  }
   update();
+  if (previous) $("saveState").textContent = `Остаток из документа ${previous.document_number}`;
 }
 function getData() {
   return {
@@ -213,7 +217,11 @@ async function signUp() {
   }
 }
 
-fields.filter((id) => id !== "documentNumber").forEach((id) => $(id).addEventListener("input", ["organization", "personName", "documentDate"].includes(id) ? syncOpeningBalance : update));
+fields.filter((id) => id !== "documentNumber").forEach((id) => {
+  const handler = ["organization", "personName", "documentDate"].includes(id) ? syncOpeningBalance : update;
+  $(id).addEventListener("input", handler);
+  if (["organization", "personName", "documentDate"].includes(id)) $(id).addEventListener("change", handler);
+});
 $("addRowButton").addEventListener("click", () => addRow());
 $("saveButton").addEventListener("click", save);
 $("clearButton").addEventListener("click", clearForm);
