@@ -8,14 +8,26 @@
 </head>
 <body>
   <main class="shell">
-    <header class="topbar">
+  <header class="topbar">
       <div class="brand"><span class="brand-mark">A</span><span>Аванс</span></div>
-      <div class="topbar-actions">
+      <div class="topbar-actions" id="topbarActions">
         <span class="save-state" id="saveState">Черновик</span>
         <button class="button button-ghost" id="documentsButton">Сохранённые документы</button>
         <button class="button button-primary" id="saveButton">Сохранить</button>
       </div>
-    </header>
+  </header>
+
+    <section class="panel auth-panel" id="authPanel">
+      <div class="panel-title"><div><h2>Вход в «Аванс»</h2><p class="muted">Войдите, чтобы документы сохранялись в общей базе</p></div></div>
+      <div class="auth-form">
+        <label>Email<input type="email" id="authEmail" placeholder="you@example.com" autocomplete="email"></label>
+        <label>Пароль<input type="password" id="authPassword" placeholder="Минимум 6 символов" autocomplete="current-password"></label>
+        <div class="auth-actions"><button class="button button-primary" id="signInButton">Войти</button><button class="button button-secondary" id="signUpButton">Создать аккаунт</button></div>
+      </div>
+      <p class="auth-message" id="authMessage"></p>
+    </section>
+
+    <div id="appContent" hidden>
 
     <section class="page-heading">
       <div>
@@ -75,9 +87,11 @@
       <div id="savedDocumentsList" class="saved-list"></div>
       <div class="empty-state" id="savedEmptyState">Сохранённых документов пока нет.</div>
     </section>
+    </div>
 
     <footer class="footer-note"><span class="status-dot"></span>Данные сохраняются в браузере на этом устройстве</footer>
   </main>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="app.js"></script>
 </body>
 </html>
