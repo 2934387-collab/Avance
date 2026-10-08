@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Аванс — документы</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div class="brand"><span class="brand-mark">A</span><span>Аванс</span></div>
+      <div class="topbar-actions">
+        <span class="save-state" id="saveState">Черновик</span>
+        <button class="button button-primary" id="saveButton">Сохранить</button>
+      </div>
+    </header>
+
+    <section class="page-heading">
+      <div>
+        <p class="eyebrow">Документ учёта</p>
+        <h1>Новый аванс</h1>
+        <p class="muted">Заполните реквизиты и добавьте операции по документу.</p>
+      </div>
+      <button class="button button-ghost" id="clearButton">Очистить форму</button>
+    </section>
+
+    <section class="summary-grid">
+      <article class="summary-card accent-card">
+        <span>Остаток на конец</span>
+        <strong id="endingBalance">0 ₽</strong>
+        <small>расчётный остаток</small>
+      </article>
+      <article class="summary-card">
+        <span>Всего операций</span>
+        <strong id="operationCount">0</strong>
+        <small>в текущем документе</small>
+      </article>
+      <article class="summary-card">
+        <span>Итого операций</span>
+        <strong id="totalAmount">0 ₽</strong>
+        <small>сумма по таблице</small>
+      </article>
+    </section>
+
+    <section class="panel">
+      <div class="panel-title"><div><h2>Реквизиты</h2><p class="muted">Основная информация о документе</p></div></div>
+      <div class="form-grid">
+        <label>Дата документа<input type="date" id="documentDate"></label>
+        <label>Организация<input type="text" id="organization" placeholder="Например, ООО «Аванс»"></label>
+        <label>Имя<input type="text" id="personName" placeholder="ФИО сотрудника"></label>
+        <label>Остаток на начало<input type="number" id="openingBalance" min="0" step="0.01" placeholder="0"></label>
+      </div>
+    </section>
+
+    <section class="panel operations-panel">
+      <div class="panel-title">
+        <div><h2>Операции</h2><p class="muted">Добавляйте расходы или выдачи по строкам</p></div>
+        <button class="button button-secondary" id="addRowButton"><span>＋</span> Новая строка</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th class="date-column">Дата</th><th>Наименование</th><th class="amount-column">Сумма</th><th class="action-column"></th></tr></thead>
+          <tbody id="operationsBody"></tbody>
+        </table>
+        <div class="empty-state" id="emptyState">Пока нет операций. Добавьте первую строку.</div>
+      </div>
+      <div class="table-footer"><span>Итого</span><strong id="tableTotal">0 ₽</strong></div>
+    </section>
+
+    <footer class="footer-note"><span class="status-dot"></span>Данные сохраняются в браузере на этом устройстве</footer>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>
