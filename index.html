@@ -12,6 +12,7 @@
       <div class="brand"><span class="brand-mark">A</span><span>Аванс</span></div>
       <div class="topbar-actions">
         <span class="save-state" id="saveState">Черновик</span>
+        <button class="button button-ghost" id="documentsButton">Сохранённые документы</button>
         <button class="button button-primary" id="saveButton">Сохранить</button>
       </div>
     </header>
@@ -47,8 +48,9 @@
       <div class="panel-title"><div><h2>Реквизиты</h2><p class="muted">Основная информация о документе</p></div></div>
       <div class="form-grid">
         <label>Дата документа<input type="date" id="documentDate"></label>
-        <label>Организация<input type="text" id="organization" placeholder="Например, ООО «Аванс»"></label>
-        <label>Имя<input type="text" id="personName" placeholder="ФИО сотрудника"></label>
+        <label>Номер документа<input type="text" id="documentNumber" placeholder="Присвоится при сохранении" readonly></label>
+        <label>Организация<input list="organizationOptions" type="text" id="organization" placeholder="Выберите или введите организацию"><datalist id="organizationOptions"></datalist></label>
+        <label>Имя<input list="nameOptions" type="text" id="personName" placeholder="Выберите или введите имя"><datalist id="nameOptions"></datalist></label>
         <label>Остаток на начало<input type="number" id="openingBalance" min="0" step="0.01" placeholder="0"></label>
       </div>
     </section>
@@ -66,6 +68,12 @@
         <div class="empty-state" id="emptyState">Пока нет операций. Добавьте первую строку.</div>
       </div>
       <div class="table-footer"><span>Итого</span><strong id="tableTotal">0 ₽</strong></div>
+    </section>
+
+    <section class="panel saved-panel" id="savedPanel" hidden>
+      <div class="panel-title"><div><h2>Сохранённые документы</h2><p class="muted">Открывайте ранее сохранённые документы на этом устройстве</p></div></div>
+      <div id="savedDocumentsList" class="saved-list"></div>
+      <div class="empty-state" id="savedEmptyState">Сохранённых документов пока нет.</div>
     </section>
 
     <footer class="footer-note"><span class="status-dot"></span>Данные сохраняются в браузере на этом устройстве</footer>
