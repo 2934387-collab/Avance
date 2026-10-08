@@ -64,7 +64,6 @@
         <label>Организация<input list="organizationOptions" type="text" id="organization" placeholder="Выберите или введите организацию"><datalist id="organizationOptions"></datalist></label>
         <label>Имя<input list="nameOptions" type="text" id="personName" placeholder="Выберите или введите имя"><datalist id="nameOptions"></datalist></label>
         <label>Остаток на начало<input type="number" id="openingBalance" min="0" step="0.01" placeholder="0"></label>
-        <label>Остаток на конец<input type="number" id="endingBalanceField" readonly></label>
       </div>
     </section>
 
@@ -75,7 +74,7 @@
       </div>
       <div class="table-wrap">
         <table>
-          <thead><tr><th class="date-column">Дата</th><th>Наименование</th><th class="type-column">Признак</th><th class="amount-column">Сумма</th><th class="action-column"></th></tr></thead>
+          <thead><tr><th class="date-column">Дата</th><th>Наименование</th><th class="amount-column">Сумма</th><th class="type-column">Расход / доход</th><th class="action-column">Удалить</th></tr></thead>
           <tbody id="operationsBody"></tbody>
         </table>
         <div class="empty-state" id="emptyState">Пока нет операций. Добавьте первую строку.</div>
