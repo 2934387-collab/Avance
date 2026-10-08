@@ -91,9 +91,18 @@ async function loadDocument(id) {
 }
 
 async function save() {
+  const saveButton = $("saveButton");
+  const originalSaveText = saveButton.textContent;
+  saveButton.disabled = true;
+  saveButton.textContent = "Сохранение...";
   const data = getData();
   const user = (await supabaseClient.auth.getUser()).data.user;
-  if (!user) return showMessage("Сначала войдите в аккаунт.");
+  if (!user) {
+    saveButton.disabled = false;
+    saveButton.textContent = originalSaveText;
+    $("saveState").textContent = "Сначала войдите в аккаунт";
+    return;
+  }
   let documentId = currentDocumentId;
   let documentNumber = $("documentNumber").value;
   if (!documentId) {
@@ -105,16 +114,34 @@ async function save() {
   let result;
   if (documentId) result = await supabaseClient.from("documents").update(documentPayload).eq("id", documentId).select().single();
   else result = await supabaseClient.from("documents").insert(documentPayload).select().single();
-  if (result.error) return showMessage(`Ошибка сохранения документа: ${result.error.message}`);
+  if (result.error) {
+    saveButton.disabled = false;
+    saveButton.textContent = originalSaveText;
+    $("saveState").textContent = `Ошибка: ${result.error.message}`;
+    return;
+  }
   documentId = result.data.id;
   currentDocumentId = documentId;
-  await supabaseClient.from("operations").delete().eq("document_id", documentId);
+  const deleteResult = await supabaseClient.from("operations").delete().eq("document_id", documentId);
+  if (deleteResult.error) {
+    saveButton.disabled = false;
+    saveButton.textContent = originalSaveText;
+    $("saveState").textContent = `Ошибка операций: ${deleteResult.error.message}`;
+    return;
+  }
   const operations = data.rows.filter((row) => row.name || Number(row.amount)).map((row) => ({ document_id: documentId, user_id: user.id, operation_date: row.date || today(), name: row.name || "", operation_type: row.type || "expense", amount: Number(row.amount) || 0 }));
   if (operations.length) {
     const operationResult = await supabaseClient.from("operations").insert(operations);
-    if (operationResult.error) return showMessage(`Документ сохранён, но операции не записались: ${operationResult.error.message}`);
+    if (operationResult.error) {
+      saveButton.disabled = false;
+      saveButton.textContent = originalSaveText;
+      $("saveState").textContent = `Документ сохранён, но ошибка операций: ${operationResult.error.message}`;
+      return;
+    }
   }
   $("saveState").textContent = `Сохранено · ${documentNumber}`;
+  saveButton.textContent = "Сохранено";
+  setTimeout(() => { saveButton.disabled = false; saveButton.textContent = originalSaveText; }, 1800);
   await loadDocuments();
 }
 
