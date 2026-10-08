@@ -138,15 +138,27 @@ function leaveApp() { $("authPanel").hidden = false; $("appContent").hidden = tr
 
 async function signIn() {
   showMessage("Выполняю вход...", false);
-  const { error } = await supabase.auth.signInWithPassword({ email: $("authEmail").value.trim(), password: $("authPassword").value });
-  if (error) showMessage(error.message);
+  try {
+    const { error } = await supabase.auth.signInWithPassword({ email: $("authEmail").value.trim(), password: $("authPassword").value });
+    if (error) showMessage(error.message);
+  } catch (error) {
+    showMessage(`Ошибка соединения: ${error.message || error}`);
+  }
 }
 
 async function signUp() {
   showMessage("Создаю аккаунт...", false);
-  const { data, error } = await supabase.auth.signUp({ email: $("authEmail").value.trim(), password: $("authPassword").value });
-  if (error) return showMessage(error.message);
-  showMessage(data.session ? "Аккаунт создан." : "Аккаунт создан. Проверьте почту для подтверждения.", false);
+  try {
+    const email = $("authEmail").value.trim();
+    const password = $("authPassword").value;
+    if (!email || !password) return showMessage("Введите email и пароль.");
+    if (password.length < 6) return showMessage("Пароль должен содержать минимум 6 символов.");
+    const { data, error } = await supabase.auth.signUp({ email, password });
+    if (error) return showMessage(error.message);
+    showMessage(data.session ? "Аккаунт создан." : "Аккаунт создан. Проверьте почту для подтверждения.", false);
+  } catch (error) {
+    showMessage(`Ошибка соединения: ${error.message || error}`);
+  }
 }
 
 fields.filter((id) => id !== "documentNumber").forEach((id) => $(id).addEventListener("input", update));
