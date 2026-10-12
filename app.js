@@ -51,7 +51,7 @@ function getData() {
 
 function addRow(data = {}) {
   const row = document.createElement("tr");
-  row.innerHTML = `<td><input type="date" class="operation-date" value="${data.date || today()}"></td><td><input type="text" class="operation-name" placeholder="Например, закупка материалов" value="${escapeHtml(data.name || "")}"></td><td><input type="number" class="operation-amount" min="0" step="0.01" placeholder="0" value="${data.amount ?? ""}"></td><td class="income-cell"><input type="checkbox" class="operation-income" aria-label="Доход"${data.type === "income" ? " checked" : ""}></td><td><button class="remove-row" type="button" title="Удалить строку">×</button></td>`;
+  row.innerHTML = `<td><input type="date" class="operation-date" value="${data.date || today()}"></td><td class="operation-name-column"><input type="text" class="operation-name" placeholder="Например, закупка материалов" value="${escapeHtml(data.name || "")}"></td><td><input type="number" class="operation-amount" min="0" step="0.01" placeholder="0" value="${data.amount ?? ""}"></td><td class="income-cell"><input type="checkbox" class="operation-income" aria-label="Доход"${data.type === "income" ? " checked" : ""}><span class="print-operation-sign">${data.type === "income" ? "+" : "−"}</span></td><td><button class="remove-row" type="button" title="Удалить строку">×</button></td>`;
   body.appendChild(row);
   row.querySelectorAll("input").forEach((input) => input.addEventListener("input", update));
   row.querySelector(".operation-income").addEventListener("change", update);
