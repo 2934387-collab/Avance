@@ -33,7 +33,7 @@ function previousDocument() {
 function syncOpeningBalance() {
   const previous = previousDocument();
   const input = $("openingBalance");
-  input.readOnly = Boolean(previous);
+  input.readOnly = false;
   if (previous) {
     input.value = documentEnding(previous).toFixed(2);
     $("saveState").textContent = `Остаток из документа ${previous.document_number}`;
