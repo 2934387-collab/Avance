@@ -59,16 +59,18 @@ input[readonly] { color: var(--muted); background: #f4f6f7; }
   .summary-card { padding: 12px; }
   input, select { border: 0; padding: 0; background: transparent !important; color: #111; font: inherit; }
   input[type="checkbox"] { display: none; }
-  .print-operation-sign { display: inline; }
-  .operation-name-column { display: none; }
+  .print-operation-sign { display: none; }
+  .operation-name-column { display: table-cell; }
   .action-column { display: none; }
   .date-column { width: 1%; white-space: nowrap; }
-  .type-column { width: 1%; white-space: nowrap; text-align: center; }
-  .amount-column { width: 99%; text-align: right; }
+  .type-column, .income-cell { display: none; }
+  .operation-name-column { width: 99%; }
+  .amount-column { width: 1%; white-space: nowrap; text-align: right; }
   table { width: 100%; font-size: 12px; }
   th, td { padding: 7px 8px; }
   .print-heading { display: block; margin-bottom: 12px; }
   .print-heading h1 { margin-bottom: 4px; font-size: 12pt; }
+  .summary-card, .summary-card span, .summary-card strong, .summary-card small { font-size: 12pt; }
 }
 .remove-row { width: 30px; height: 30px; border: 0; border-radius: 8px; color: #a0a8b0; background: transparent; cursor: pointer; font-size: 20px; } .remove-row:hover { color: #b34a4a; background: #fff0f0; }
 .empty-state { padding: 28px 0 15px; color: var(--muted); font-size: 14px; text-align: center; } .table-footer { display: flex; justify-content: flex-end; gap: 68px; padding-top: 19px; margin-top: 9px; border-top: 1px solid var(--line); font-size: 14px; } .table-footer strong { min-width: 112px; text-align: right; }
