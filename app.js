@@ -20,7 +20,6 @@ function escapeHtml(value) { return String(value).replace(/[&<>"']/g, (char) => 
 function showMessage(message, isError = true) { $("authMessage").textContent = message; $("authMessage").style.color = isError ? "#a84e4e" : "#2f8a66"; }
 function movement(rows) { return rows.reduce((sum, row) => sum + ((Number(row.amount) || 0) * (row.type === "income" ? 1 : -1)), 0); }
 function documentEnding(doc) {
-  if (doc.ending_balance !== null && doc.ending_balance !== undefined) return Number(doc.ending_balance) || 0;
   return (Number(doc.opening_balance) || 0) + movement((doc.operations || []).map((row) => ({ type: row.operation_type, amount: row.amount })));
 }
 function previousDocument() {
