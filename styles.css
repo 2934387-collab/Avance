@@ -43,6 +43,27 @@ input { width: 100%; min-width: 0; padding: 12px 13px; border: 1px solid var(--l
 input[readonly] { color: var(--muted); background: #f4f6f7; }
 .table-wrap { overflow-x: auto; } table { width: 100%; border-collapse: collapse; } th { padding: 0 12px 12px; color: var(--muted); font-size: 11px; font-weight: 750; text-align: left; text-transform: uppercase; letter-spacing: .08em; } td { padding: 12px; border-top: 1px solid var(--line); } td:first-child, th:first-child { padding-left: 0; } td:last-child, th:last-child { padding-right: 0; }
 .date-column { width: 165px; } .type-column { width: 145px; } .amount-column { width: 180px; } .action-column { width: 70px; } td input { background: #fff; } .income-cell { text-align: center; } .income-toggle { display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; } .income-toggle input { width: 17px; height: 17px; }
+
+@media print {
+  @page { size: A4; margin: 16mm; }
+  body { background: #fff; color: #111; }
+  .shell { max-width: none; padding: 0; }
+  .topbar { border-bottom: 2px solid #111; padding: 0 0 10px; margin-bottom: 18px; }
+  .topbar-actions { gap: 0; }
+  .topbar-actions button, .topbar-actions .save-state, .auth-panel, .page-heading > button, .operations-panel .panel-title button, .remove-row, .saved-panel, .footer-note, .empty-state { display: none !important; }
+  .brand { font-size: 24px; }
+  #appContent { display: block !important; }
+  .panel, .summary-card { box-shadow: none; border: 1px solid #bbb; break-inside: avoid; }
+  .panel { margin-bottom: 14px; padding: 14px; }
+  .summary-grid { grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .summary-card { padding: 12px; }
+  input, select { border: 0; padding: 0; background: transparent !important; color: #111; font: inherit; }
+  input[type="checkbox"] { appearance: auto; width: 14px; height: 14px; }
+  table { font-size: 12px; }
+  th, td { padding: 7px 8px; }
+  .print-heading { display: block; margin-bottom: 12px; }
+  .print-heading h1 { margin-bottom: 4px; }
+}
 .remove-row { width: 30px; height: 30px; border: 0; border-radius: 8px; color: #a0a8b0; background: transparent; cursor: pointer; font-size: 20px; } .remove-row:hover { color: #b34a4a; background: #fff0f0; }
 .empty-state { padding: 28px 0 15px; color: var(--muted); font-size: 14px; text-align: center; } .table-footer { display: flex; justify-content: flex-end; gap: 68px; padding-top: 19px; margin-top: 9px; border-top: 1px solid var(--line); font-size: 14px; } .table-footer strong { min-width: 112px; text-align: right; }
 .saved-list { display: grid; gap: 9px; }
