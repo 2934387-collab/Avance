@@ -45,7 +45,7 @@ input[readonly] { color: var(--muted); background: #f4f6f7; }
 .date-column { width: 165px; } .type-column { width: 145px; } .amount-column { width: 180px; } .action-column { width: 70px; } td input { background: #fff; } .income-cell { text-align: center; } .income-toggle { display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; } .income-toggle input { width: 17px; height: 17px; } .print-operation-sign { display: none; }
 
 @media print {
-  @page { size: A4; margin: 16mm; }
+  @page { size: A4; margin: 8mm; }
   body { background: #fff; color: #111; }
   .shell { max-width: none; padding: 0; }
   .topbar { border-bottom: 2px solid #111; padding: 0 0 10px; margin-bottom: 18px; }
@@ -54,9 +54,18 @@ input[readonly] { color: var(--muted); background: #f4f6f7; }
   .topbar, .topbar-actions, .auth-panel, .page-heading > button, .operations-panel .panel-title, .remove-row, .saved-panel, .footer-note, .empty-state { display: none !important; }
   #appContent { display: block !important; }
   .panel, .summary-card { box-shadow: none; border: 1px solid #bbb; break-inside: avoid; }
-  .panel { margin-bottom: 14px; padding: 14px; }
-  .summary-grid { grid-template-columns: repeat(3, 1fr); gap: 10px; }
-  .summary-card { padding: 12px; }
+  .panel { margin-bottom: 7px; padding: 7px 9px; }
+  .page-heading { margin: 0 0 7px; gap: 4px; }
+  .page-heading h1 { margin: 0; font-size: 12pt; }
+  .page-heading .muted { margin: 2px 0 0; font-size: 9pt; }
+  .summary-grid { grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 7px; }
+  .summary-card { padding: 6px 8px; }
+  .summary-card span, .summary-card small { display: block; line-height: 1.1; }
+  .summary-card strong { display: block; line-height: 1.1; margin: 2px 0; }
+  .form-grid { gap: 5px 9px; }
+  .form-grid label { gap: 2px; font-size: 9pt; }
+  .form-grid input { min-height: 16px; }
+  .operations-panel { padding-top: 6px; }
   input, select { border: 0; padding: 0; background: transparent !important; color: #111; font: inherit; }
   input[type="checkbox"] { display: none; }
   .print-operation-sign { display: none; }
@@ -67,8 +76,8 @@ input[readonly] { color: var(--muted); background: #f4f6f7; }
   .operation-name-column { width: 99%; }
   .amount-column { width: 1%; white-space: nowrap; text-align: right; }
   table { width: 100%; font-size: 12px; }
-  th, td { padding: 7px 8px; }
-  .print-heading { display: block; margin-bottom: 12px; }
+  th, td { padding: 4px 6px; }
+  .print-heading { display: block; margin-bottom: 7px; }
   .print-heading h1 { margin-bottom: 4px; font-size: 12pt; }
   .summary-card, .summary-card span, .summary-card strong, .summary-card small { font-size: 12pt; }
 }
