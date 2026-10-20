@@ -82,7 +82,7 @@ input[readonly] { color: var(--muted); background: #f4f6f7; }
   table { width: 100%; font-size: 12px; }
   th, td { padding: 4px 6px; }
   .summary-card, .summary-card span, .summary-card strong, .summary-card small { font-size: 12pt; }
-  .accent-card { display: flex; align-items: baseline; gap: 8px; }
+  .accent-card { display: flex; align-items: baseline; gap: 8px; width: max-content; min-width: 0; white-space: nowrap; }
   .accent-card span, .accent-card strong { display: inline; }
   .accent-card small { display: none; }
   .document-details-panel .form-grid { display: flex; flex-wrap: wrap; align-items: end; gap: 5px 12px; }
