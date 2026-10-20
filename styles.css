@@ -51,7 +51,7 @@ input[readonly] { color: var(--muted); background: #f4f6f7; }
   .topbar { border-bottom: 2px solid #111; padding: 0 0 10px; margin-bottom: 18px; }
   .topbar-actions { gap: 0; }
  .topbar-actions button, .topbar-actions .save-state, .auth-panel, .page-heading > button, .operations-panel .panel-title button, .remove-row, .saved-panel, .footer-note, .empty-state { display: none !important; }
-  .topbar, .topbar-actions, .auth-panel, .page-heading > button, .operations-panel .panel-title, .remove-row, .saved-panel, .footer-note, .empty-state { display: none !important; }
+  .topbar, .topbar-actions, .auth-panel, .print-heading, .panel > .panel-title, .page-heading > button, .operations-panel .panel-title, .remove-row, .saved-panel, .footer-note, .empty-state { display: none !important; }
   #appContent { display: block !important; }
   .panel, .summary-card { box-shadow: none; border: 1px solid #bbb; break-inside: avoid; }
   .panel { margin-bottom: 7px; padding: 7px 9px; }
@@ -77,8 +77,6 @@ input[readonly] { color: var(--muted); background: #f4f6f7; }
   .amount-column { width: 1%; white-space: nowrap; text-align: right; }
   table { width: 100%; font-size: 12px; }
   th, td { padding: 4px 6px; }
-  .print-heading { display: block; margin-bottom: 7px; }
-  .print-heading h1 { margin-bottom: 4px; font-size: 12pt; }
   .summary-card, .summary-card span, .summary-card strong, .summary-card small { font-size: 12pt; }
 }
 .remove-row { width: 30px; height: 30px; border: 0; border-radius: 8px; color: #a0a8b0; background: transparent; cursor: pointer; font-size: 20px; } .remove-row:hover { color: #b34a4a; background: #fff0f0; }
