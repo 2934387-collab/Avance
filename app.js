@@ -232,7 +232,7 @@ $("addRowButton").addEventListener("click", () => addRow());
 $("saveButton").addEventListener("click", save);
 $("clearButton").addEventListener("click", clearForm);
 $("documentsButton").addEventListener("click", () => { $("savedPanel").hidden = !$("savedPanel").hidden; renderSavedDocuments(); });
-$("printButton").addEventListener("click", () => window.print());
+$("printButton").addEventListener("click", () => { updateSignatureName(); window.print(); });
 $("signInButton").addEventListener("click", signIn);
 $("signUpButton").addEventListener("click", signUp);
 
