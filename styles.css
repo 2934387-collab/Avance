@@ -71,6 +71,10 @@ input[readonly] { color: var(--muted); background: #f4f6f7; }
   .form-grid label { gap: 2px; font-size: 9pt; }
   .form-grid input { min-height: 16px; }
   .operations-panel { padding-top: 6px; }
+  .print-signatures { display: flex; justify-content: space-between; gap: 45px; margin-top: 24px; break-inside: avoid; }
+  .signature-line { width: 42%; text-align: center; }
+  .signature-rule { height: 24px; border-bottom: 1px solid #111; margin-bottom: 4px; }
+  .signature-caption { font-size: 10pt; }
   input, select { border: 0; padding: 0; background: transparent !important; color: #111; font: inherit; }
   input[type="checkbox"] { display: none; }
   .print-operation-sign { display: none; }
@@ -101,6 +105,7 @@ input[readonly] { color: var(--muted); background: #f4f6f7; }
 .remove-row { width: 30px; height: 30px; border: 0; border-radius: 8px; color: #a0a8b0; background: transparent; cursor: pointer; font-size: 20px; } .remove-row:hover { color: #b34a4a; background: #fff0f0; }
 .empty-state { padding: 28px 0 15px; color: var(--muted); font-size: 14px; text-align: center; } .table-footer { display: flex; justify-content: flex-end; gap: 68px; padding-top: 19px; margin-top: 9px; border-top: 1px solid var(--line); font-size: 14px; } .table-footer strong { min-width: 112px; text-align: right; }
 .saved-list { display: grid; gap: 9px; }
+.print-signatures { display: none; }
 .saved-item { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 14px 16px; border: 1px solid var(--line); border-radius: 10px; background: #fcfcfd; }
 .saved-item:hover { border-color: #e9c477; background: #fffaf0; }
 .saved-item-main { display: grid; gap: 4px; min-width: 0; }
