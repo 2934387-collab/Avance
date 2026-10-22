@@ -41,6 +41,10 @@ function syncOpeningBalance() {
   update();
   if (previous) $("saveState").textContent = `Остаток из документа ${previous.document_number}`;
 }
+function updateSignatureName() {
+  const name = $("personName").value.trim();
+  $("signaturePerson").textContent = name || "________________";
+}
 function getData() {
   return {
     fields: Object.fromEntries(fields.map((id) => [id, $(id).value])),
@@ -109,6 +113,7 @@ async function loadDocument(id) {
   body.innerHTML = "";
   (document.operations || []).forEach((row) => addRow({ date: row.operation_date, name: row.name, type: row.operation_type, amount: row.amount }));
   syncOpeningBalance();
+  updateSignatureName();
   update();
   $("savedPanel").hidden = true;
   window.scrollTo({ top: 0, behavior: "smooth" });
@@ -221,6 +226,8 @@ fields.filter((id) => id !== "documentNumber").forEach((id) => {
   $(id).addEventListener("input", handler);
   if (["organization", "personName", "documentDate"].includes(id)) $(id).addEventListener("change", handler);
 });
+$("personName").addEventListener("input", updateSignatureName);
+$("personName").addEventListener("change", updateSignatureName);
 $("addRowButton").addEventListener("click", () => addRow());
 $("saveButton").addEventListener("click", save);
 $("clearButton").addEventListener("click", clearForm);
