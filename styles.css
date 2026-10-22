@@ -71,7 +71,7 @@ input[readonly] { color: var(--muted); background: #f4f6f7; }
   .form-grid label { gap: 2px; font-size: 9pt; }
   .form-grid input { min-height: 16px; }
   .operations-panel { padding-top: 6px; }
-  .print-signatures { display: flex !important; justify-content: space-between; gap: 45px; margin-top: 24px; break-inside: avoid; }
+  .print-signatures { display: flex !important; order: 4; justify-content: space-between; gap: 45px; margin-top: 24px; break-inside: avoid; }
   .signature-line { width: 42%; text-align: center; }
   .signature-rule { height: 24px; border-bottom: 1px solid #111; margin-bottom: 4px; }
   .signature-caption { font-size: 10pt; }
