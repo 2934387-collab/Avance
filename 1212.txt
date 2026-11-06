@@ -1,0 +1,14 @@
+api:  sb_publishable_gaeh2owrgPYET5iof4jJ4w_ghxPcksQ
+
+URL Project  :  https://sgwhxfvcqcfwewekhspw.supabase.co
+
+ Publishable rey:   sb_publishable_gaeh2owrgPYET5iof4jJ4w_ghxPcksQ
+
+
+Direct connection string:    postgresql://postgres:[YOUR-PASSWORD]@db.sgwhxfvcqcfwewekhspw.supabase.co:5432/postgres
+
+
+
+supabase login
+supabase init
+supabase link --project-ref sgwhxfvcqcfwewekhspw
