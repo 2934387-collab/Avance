@@ -14,6 +14,7 @@
         <span class="save-state" id="saveState">Черновик</span>
         <button class="button button-ghost" id="printButton" type="button">Печать отчёта</button>
         <button class="button button-ghost" id="documentsButton">Сохранённые документы</button>
+        <button class="button button-ghost" id="summaryReportButton" type="button">Сводный отчёт за период</button>
         <button class="button button-primary" id="saveButton">Сохранить</button>
       </div>
   </header>
@@ -98,6 +99,24 @@
       <div class="panel-title"><div><h2>Сохранённые документы</h2><p class="muted">Открывайте ранее сохранённые документы на этом устройстве</p></div></div>
       <div id="savedDocumentsList" class="saved-list"></div>
       <div class="empty-state" id="savedEmptyState">Сохранённых документов пока нет.</div>
+    </section>
+
+    <section class="panel report-panel" id="reportPanel" hidden>
+      <div class="panel-title">
+        <div><h2>Сводный отчёт за период</h2><p class="muted">Выберите имя и даты документов, чтобы собрать операции по организациям.</p></div>
+        <button class="button button-ghost" id="reportBackButton" type="button">Назад к документу</button>
+      </div>
+      <div class="report-filters">
+        <label>Дата от<input type="date" id="reportDateFrom"></label>
+        <label>Дата до<input type="date" id="reportDateTo"></label>
+        <label>Имя<select id="reportName"><option value="">Выберите имя</option></select></label>
+        <div class="report-actions">
+          <button class="button button-primary" id="generateReportButton" type="button">Сформировать отчёт</button>
+          <button class="button button-secondary" id="reportPrintButton" type="button" hidden>Печать отчёта</button>
+        </div>
+      </div>
+      <p class="auth-message" id="reportMessage"></p>
+      <div id="reportResults" class="report-results"></div>
     </section>
     </div>
 
