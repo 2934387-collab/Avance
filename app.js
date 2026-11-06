@@ -16,6 +16,7 @@ let savedDocuments = [];
 
 function today() { return new Date().toISOString().slice(0, 10); }
 function formatMoney(value) { return money.format(Number(value) || 0); }
+function normalizeText(value) { return String(value || "").trim().replace(/\s+/g, " ").toLocaleLowerCase("ru-RU"); }
 function escapeHtml(value) { return String(value).replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" }[char])); }
 function showMessage(message, isError = true) { $("authMessage").textContent = message; $("authMessage").style.color = isError ? "#a84e4e" : "#2f8a66"; }
 function movement(rows) { return rows.reduce((sum, row) => sum + ((Number(row.amount) || 0) * (row.type === "income" ? 1 : -1)), 0); }
@@ -81,6 +82,130 @@ function refreshSuggestions() {
   const names = [...new Set(savedDocuments.map((doc) => doc.person_name).filter(Boolean))].sort();
   $("organizationOptions").innerHTML = organizations.map((value) => `<option value="${escapeHtml(value)}"></option>`).join("");
   $("nameOptions").innerHTML = names.map((value) => `<option value="${escapeHtml(value)}"></option>`).join("");
+  $("reportName").innerHTML = `<option value="">Выберите имя</option>${names.map((value) => `<option value="${escapeHtml(value)}">${escapeHtml(value)}</option>`).join("")}`;
+}
+
+function normalizeDocumentField(id, field) {
+  const input = $(id);
+  const value = input.value.trim().replace(/\s+/g, " ");
+  if (!value) return true;
+  const existing = savedDocuments.map((doc) => doc[field]).filter(Boolean).find((item) => normalizeText(item) === normalizeText(value));
+  if (existing && existing !== value) {
+    if (!confirm(`Уже есть значение «${existing}». Использовать его вместо «${value}»?`)) return false;
+    input.value = existing;
+  } else {
+    input.value = value;
+  }
+  return true;
+}
+
+function enterReportMode() {
+  $("savedPanel").hidden = true;
+  $("reportPanel").hidden = false;
+  $("appContent").classList.add("report-mode");
+  if (!$("reportDateFrom").value) $("reportDateFrom").value = `${new Date().getFullYear()}-01-01`;
+  if (!$("reportDateTo").value) $("reportDateTo").value = today();
+  refreshSuggestions();
+}
+
+function leaveReportMode() {
+  $("appContent").classList.remove("report-mode");
+  $("reportPanel").hidden = true;
+  $("reportResults").innerHTML = "";
+  $("reportPrintButton").hidden = true;
+  $("reportMessage").textContent = "";
+}
+
+function renderReport() {
+  const from = $("reportDateFrom").value;
+  const to = $("reportDateTo").value;
+  const person = $("reportName").value;
+  const message = $("reportMessage");
+  message.textContent = "";
+  if (!from || !to || !person) { message.textContent = "Выберите период и имя."; return; }
+  if (from > to) { message.textContent = "Дата начала не может быть позже даты окончания."; return; }
+
+  const documents = savedDocuments.filter((doc) => doc.document_date >= from && doc.document_date <= to && normalizeText(doc.person_name) === normalizeText(person));
+  const groups = new Map();
+  documents.forEach((doc) => {
+    const organization = doc.organization || "Без организации";
+    const key = normalizeText(organization);
+    if (!groups.has(key)) groups.set(key, { name: organization, documents: [], operations: [], income: 0, expense: 0, balance: 0 });
+    const group = groups.get(key);
+    group.documents.push(doc);
+    group.balance += Number(doc.opening_balance) || 0;
+    (doc.operations || []).forEach((operation) => {
+      const amount = Number(operation.amount) || 0;
+      if (operation.operation_type === "income") group.income += amount;
+      else group.expense += amount;
+      group.operations.push({ ...operation, document_date: doc.document_date, document_number: doc.document_number });
+    });
+  });
+  if (!groups.size) {
+    $("reportResults").innerHTML = `<div class="report-empty">За выбранный период документы для имени «${escapeHtml(person)}» не найдены.</div>`;
+    $("reportPrintButton").hidden = true;
+    return;
+  }
+  const blocks = [...groups.values()].map((group) => {
+    group.balance += group.income - group.expense;
+    const operations = group.operations.sort((a, b) => `${a.operation_date || ""}${a.name || ""}`.localeCompare(`${b.operation_date || ""}${b.name || ""}`));
+    const rows = operations.length ? operations.map((operation) => `<tr><td>${escapeHtml(operation.operation_date || operation.document_date || "")}</td><td>${escapeHtml(operation.document_number || "")}</td><td>${escapeHtml(operation.name || "Без названия")}</td><td>${operation.operation_type === "income" ? "Доход" : "Расход"}</td><td>${formatMoney(operation.amount)}</td></tr>`).join("") : `<tr><td colspan="5">Операций нет</td></tr>`;
+    return `<section class="report-block"><div class="report-heading"><h3>${escapeHtml(group.name)}</h3><span>${group.documents.length} док. · ${operations.length} оп.</span></div><div class="report-summary"><div><small>Расходы</small><strong>${formatMoney(group.expense)}</strong></div><div><small>Доходы</small><strong>${formatMoney(group.income)}</strong></div><div><small>Итоговый баланс</small><strong>${formatMoney(group.balance)}</strong></div><div><small>Документов</small><strong>${group.documents.length}</strong></div></div><div class="table-wrap"><table><thead><tr><th>Дата операции</th><th>Документ</th><th>Операция</th><th>Тип</th><th>Сумма</th></tr></thead><tbody>${rows}</tbody></table></div></section>`;
+  }).join("");
+  $("reportResults").innerHTML = `<div class="report-heading"><h3>Отчёт по имени: ${escapeHtml(person)}</h3><span>${escapeHtml(from)} — ${escapeHtml(to)}</span></div>${blocks}`;
+  $("reportPrintButton").hidden = false;
+}
+
+function renderDetailedReport() {
+  const from = $("reportDateFrom").value;
+  const to = $("reportDateTo").value;
+  const person = $("reportName").value;
+  const message = $("reportMessage");
+  message.textContent = "";
+  if (!from || !to || !person) { message.textContent = "Выберите период и имя."; return; }
+  if (from > to) { message.textContent = "Дата начала не может быть позже даты окончания."; return; }
+
+  const documents = savedDocuments.filter((doc) => doc.document_date >= from && doc.document_date <= to && normalizeText(doc.person_name) === normalizeText(person));
+  const groups = new Map();
+  documents.forEach((doc) => {
+    const organization = doc.organization || "Без организации";
+    const key = normalizeText(organization);
+    if (!groups.has(key)) groups.set(key, { name: organization, documents: [] });
+    groups.get(key).documents.push(doc);
+  });
+  if (!groups.size) {
+    $("reportResults").innerHTML = `<div class="report-empty">За выбранный период документы для имени «${escapeHtml(person)}» не найдены.</div>`;
+    $("reportPrintButton").hidden = true;
+    return;
+  }
+
+  const organizationBlocks = [...groups.values()].map((group) => {
+    let organizationIncome = 0;
+    let organizationExpense = 0;
+    let organizationOpening = 0;
+    const documentBlocks = [...group.documents].sort((a, b) => String(a.document_date).localeCompare(String(b.document_date))).map((doc) => {
+      const operations = [...(doc.operations || [])].sort((a, b) => String(a.operation_date || "").localeCompare(String(b.operation_date || "")));
+      let income = 0;
+      let expense = 0;
+      organizationOpening += Number(doc.opening_balance) || 0;
+      const rows = operations.length ? operations.map((operation) => {
+        const amount = Number(operation.amount) || 0;
+        const isIncome = operation.operation_type === "income";
+        if (isIncome) income += amount;
+        else expense += amount;
+        return `<tr><td>${escapeHtml(operation.operation_date || "")}</td><td>${escapeHtml(operation.name || "Без названия")}</td><td class="income-column">${isIncome ? formatMoney(amount) : ""}</td><td class="expense-column">${isIncome ? "" : formatMoney(amount)}</td></tr>`;
+      }).join("") : `<tr><td colspan="4">Операций нет</td></tr>`;
+      organizationIncome += income;
+      organizationExpense += expense;
+      const balance = (Number(doc.opening_balance) || 0) + income - expense;
+      return `<section class="report-document"><div class="report-document-heading"><strong>Документ ${escapeHtml(doc.document_number || "без номера")}</strong><span>Дата документа: ${escapeHtml(doc.document_date || "")}</span></div><div class="table-wrap"><table><thead><tr><th>Дата операции</th><th>Операция</th><th class="income-column">Доход</th><th class="expense-column">Расход</th></tr></thead><tbody>${rows}</tbody><tfoot><tr><th colspan="2">Итого по документу</th><th class="income-column">${formatMoney(income)}</th><th class="expense-column">${formatMoney(expense)}</th></tr></tfoot></table></div><div class="report-document-total"><span>Остаток на начало: <strong>${formatMoney(doc.opening_balance)}</strong></span><span>Итоговый баланс: <strong>${formatMoney(balance)}</strong></span></div></section>`;
+    }).join("");
+    const organizationBalance = organizationOpening + organizationIncome - organizationExpense;
+    return `<section class="report-block"><div class="report-heading"><h3>${escapeHtml(group.name)}</h3><span>${group.documents.length} док.</span></div>${documentBlocks}<div class="report-organization-total"><span>Доходы: <strong>${formatMoney(organizationIncome)}</strong></span><span>Расходы: <strong>${formatMoney(organizationExpense)}</strong></span><span>Итоговый баланс: <strong>${formatMoney(organizationBalance)}</strong></span></div></section>`;
+  }).join("");
+
+  $("reportResults").innerHTML = `<div class="report-heading"><h3>Отчёт по имени: ${escapeHtml(person)}</h3><span>${escapeHtml(from)} — ${escapeHtml(to)}</span></div>${organizationBlocks}`;
+  $("reportPrintButton").hidden = false;
 }
 
 function renderSavedDocuments() {
@@ -124,6 +249,11 @@ async function save() {
   const originalSaveText = saveButton.textContent;
   saveButton.disabled = true;
   saveButton.textContent = "Сохранение...";
+  if (!normalizeDocumentField("organization", "organization") || !normalizeDocumentField("personName", "person_name")) {
+    saveButton.disabled = false;
+    saveButton.textContent = originalSaveText;
+    return;
+  }
   const data = getData();
   const user = (await supabaseClient.auth.getUser()).data.user;
   if (!user) {
@@ -233,6 +363,11 @@ $("saveButton").addEventListener("click", save);
 $("clearButton").addEventListener("click", clearForm);
 $("documentsButton").addEventListener("click", () => { $("savedPanel").hidden = !$("savedPanel").hidden; renderSavedDocuments(); });
 $("printButton").addEventListener("click", () => { updateSignatureName(); window.print(); });
+$("summaryReportButton").addEventListener("click", enterReportMode);
+$("reportBackButton").addEventListener("click", leaveReportMode);
+$("generateReportButton").addEventListener("click", renderDetailedReport);
+$("reportPrintButton").addEventListener("click", () => { document.body.classList.add("report-print"); window.print(); });
+window.addEventListener("afterprint", () => document.body.classList.remove("report-print"));
 $("signInButton").addEventListener("click", signIn);
 $("signUpButton").addEventListener("click", signUp);
 
