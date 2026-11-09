@@ -102,6 +102,7 @@ function normalizeDocumentField(id, field) {
 function enterReportMode() {
   $("savedPanel").hidden = true;
   $("reportPanel").hidden = false;
+  $("appContent").classList.remove("documents-mode");
   $("appContent").classList.add("report-mode");
   if (!$("reportDateFrom").value) $("reportDateFrom").value = `${new Date().getFullYear()}-01-01`;
   if (!$("reportDateTo").value) $("reportDateTo").value = today();
@@ -114,6 +115,19 @@ function leaveReportMode() {
   $("reportResults").innerHTML = "";
   $("reportPrintButton").hidden = true;
   $("reportMessage").textContent = "";
+}
+
+function enterDocumentsMode() {
+  $("reportPanel").hidden = true;
+  $("savedPanel").hidden = false;
+  $("appContent").classList.remove("report-mode");
+  $("appContent").classList.add("documents-mode");
+  renderSavedDocuments();
+}
+
+function leaveDocumentsMode() {
+  $("appContent").classList.remove("documents-mode");
+  $("savedPanel").hidden = true;
 }
 
 function renderReport() {
@@ -374,7 +388,8 @@ $("personName").addEventListener("change", updateSignatureName);
 $("addRowButton").addEventListener("click", () => addRow());
 $("saveButton").addEventListener("click", save);
 $("clearButton").addEventListener("click", clearForm);
-$("documentsButton").addEventListener("click", () => { $("savedPanel").hidden = !$("savedPanel").hidden; renderSavedDocuments(); });
+$("documentsButton").addEventListener("click", enterDocumentsMode);
+$("documentsBackButton").addEventListener("click", leaveDocumentsMode);
 $("printButton").addEventListener("click", () => { updateSignatureName(); window.print(); });
 $("summaryReportButton").addEventListener("click", enterReportMode);
 $("reportBackButton").addEventListener("click", leaveReportMode);
