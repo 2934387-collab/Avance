@@ -266,7 +266,35 @@ async function loadDocument(id) {
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
+async function recalculateDocumentBalances(organization, personName) {
+  const organizationKey = normalizeText(organization);
+  const personKey = normalizeText(personName);
+  const documents = savedDocuments
+    .filter((doc) => normalizeText(doc.organization) === organizationKey && normalizeText(doc.person_name) === personKey)
+    .sort((a, b) => `${a.document_date || ""}T${a.created_at || a.id}`.localeCompare(`${b.document_date || ""}T${b.created_at || b.id}`));
+
+  let previousEnding = null;
+  for (const doc of documents) {
+    const opening = previousEnding === null ? Number(doc.opening_balance) || 0 : previousEnding;
+    const movementAmount = movement((doc.operations || []).map((row) => ({ type: row.operation_type, amount: row.amount })));
+    const ending = opening + movementAmount;
+    const currentOpening = Number(doc.opening_balance) || 0;
+    const currentEnding = Number(doc.ending_balance) || 0;
+    if (Math.abs(currentOpening - opening) > 0.005 || Math.abs(currentEnding - ending) > 0.005) {
+      const { error } = await supabaseClient.from("documents").update({ opening_balance: opening, ending_balance: ending }).eq("id", doc.id);
+      if (error) {
+        showMessage(`Ошибка пересчёта остатков: ${error.message}`);
+        return false;
+      }
+    }
+    previousEnding = ending;
+  }
+  return true;
+}
+
 async function save() {
+  const editingSavedDocument = Boolean(currentDocumentId);
+  if (editingSavedDocument && !confirm("Вы изменяете сохранённый документ, это повлечёт за собой полный пересчёт остатков!\n\nПодтвердите изменения.")) return;
   const saveButton = $("saveButton");
   const originalSaveText = saveButton.textContent;
   saveButton.disabled = true;
@@ -325,6 +353,7 @@ async function save() {
   saveButton.textContent = "Сохранено";
   setTimeout(() => { saveButton.disabled = false; saveButton.textContent = originalSaveText; }, 1800);
   await loadDocuments();
+  if (await recalculateDocumentBalances(data.fields.organization, data.fields.personName)) await loadDocuments();
 }
 
 async function deleteDocument(id) {
