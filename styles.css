@@ -111,12 +111,14 @@ input[readonly] { color: var(--muted); background: #f4f6f7; }
 .saved-item-main { display: grid; gap: 4px; min-width: 0; }
 .saved-item-title { overflow: hidden; color: var(--ink); font-size: 14px; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
 .saved-item-meta { color: var(--muted); font-size: 12px; }
+.saved-item-metrics { display: flex; flex-wrap: wrap; gap: 10px 18px; color: var(--muted); font-size: 12px; }
+.saved-item-metrics strong { color: var(--ink); font-weight: 700; }
 .saved-item-actions { display: flex; gap: 8px; flex-shrink: 0; }
 .saved-item-actions button { padding: 7px 10px; border: 0; border-radius: 8px; font: inherit; font-size: 12px; font-weight: 700; cursor: pointer; }
 .open-document { color: var(--ink); background: #fff0cf; }
 .delete-document { color: #a84e4e; background: #fff0f0; }
 .footer-note { display: flex; align-items: center; gap: 8px; padding: 3px 2px; color: var(--muted); font-size: 12px; } .status-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); }
-@media (max-width: 760px) { .shell { width: min(100% - 24px, 650px); padding-top: 18px; } .page-heading, .panel-title { align-items: flex-start; flex-direction: column; } .summary-grid, .form-grid, .auth-form { grid-template-columns: 1fr 1fr; } .summary-card:first-child { grid-column: span 2; } .topbar { padding-bottom: 24px; } }
+@media (max-width: 760px) { .shell { width: min(100% - 24px, 650px); padding-top: 18px; } .page-heading, .panel-title { align-items: flex-start; flex-direction: column; } .summary-grid, .form-grid, .auth-form { grid-template-columns: 1fr 1fr; } .summary-card:first-child { grid-column: span 2; } .topbar { padding-bottom: 24px; } .saved-item { align-items: flex-start; flex-direction: column; } .saved-item-actions { width: 100%; } }
 @media (max-width: 470px) { .topbar-actions { gap: 8px; } .save-state { display: none; } .summary-grid, .form-grid { grid-template-columns: 1fr; } .summary-card:first-child { grid-column: auto; } .panel { padding: 18px; } }
 
 .report-filters { display: grid; grid-template-columns: repeat(3, minmax(150px, 1fr)) auto; align-items: end; gap: 14px; margin-top: 20px; }
