@@ -67,7 +67,7 @@ function update() {
   const data = getData();
   const opening = Number(data.fields.openingBalance) || 0;
   const netMovement = movement(data.rows);
-  const total = netMovement;
+  const total = opening + netMovement;
   $("totalAmount").textContent = formatMoney(total);
   $("tableTotal").textContent = formatMoney(total);
   const ending = opening + netMovement;
@@ -182,12 +182,11 @@ function renderDetailedReport() {
   const organizationBlocks = [...groups.values()].map((group) => {
     let organizationIncome = 0;
     let organizationExpense = 0;
-    let organizationOpening = 0;
-    const documentBlocks = [...group.documents].sort((a, b) => String(a.document_date).localeCompare(String(b.document_date))).map((doc) => {
+    const sortedDocuments = [...group.documents].sort((a, b) => `${a.document_date || ""}T${a.created_at || a.updated_at || ""}`.localeCompare(`${b.document_date || ""}T${b.created_at || b.updated_at || ""}`));
+    const documentBlocks = sortedDocuments.map((doc) => {
       const operations = [...(doc.operations || [])].sort((a, b) => String(a.operation_date || "").localeCompare(String(b.operation_date || "")));
       let income = 0;
       let expense = 0;
-      organizationOpening += Number(doc.opening_balance) || 0;
       const rows = operations.length ? operations.map((operation) => {
         const amount = Number(operation.amount) || 0;
         const isIncome = operation.operation_type === "income";
@@ -200,7 +199,8 @@ function renderDetailedReport() {
       const balance = (Number(doc.opening_balance) || 0) + income - expense;
       return `<section class="report-document"><div class="report-document-heading"><strong>Документ ${escapeHtml(doc.document_number || "без номера")}</strong><span>Дата документа: ${escapeHtml(doc.document_date || "")}</span></div><div class="table-wrap"><table><thead><tr><th>Дата операции</th><th>Операция</th><th class="income-column">Доход</th><th class="expense-column">Расход</th></tr></thead><tbody>${rows}</tbody><tfoot><tr><th colspan="2">Итого по документу</th><th class="income-column">${formatMoney(income)}</th><th class="expense-column">${formatMoney(expense)}</th></tr></tfoot></table></div><div class="report-document-total"><span>Остаток на начало: <strong>${formatMoney(doc.opening_balance)}</strong></span><span>Итоговый баланс: <strong>${formatMoney(balance)}</strong></span></div></section>`;
     }).join("");
-    const organizationBalance = organizationOpening + organizationIncome - organizationExpense;
+    const lastDocument = sortedDocuments[sortedDocuments.length - 1];
+    const organizationBalance = lastDocument ? documentEnding(lastDocument) : 0;
     return `<section class="report-block"><div class="report-heading"><h3>${escapeHtml(group.name)}</h3><span>${group.documents.length} док.</span></div>${documentBlocks}<div class="report-organization-total"><span>Доходы: <strong>${formatMoney(organizationIncome)}</strong></span><span>Расходы: <strong>${formatMoney(organizationExpense)}</strong></span><span>Итоговый баланс: <strong>${formatMoney(organizationBalance)}</strong></span></div></section>`;
   }).join("");
 
