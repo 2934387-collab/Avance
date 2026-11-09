@@ -211,12 +211,20 @@ function renderDetailedReport() {
 function renderSavedDocuments() {
   const list = $("savedDocumentsList");
   $("savedEmptyState").hidden = savedDocuments.length > 0;
-  list.innerHTML = savedDocuments.map((doc) => `<div class="saved-item" data-id="${doc.id}"><div class="saved-item-main"><div class="saved-item-title">${escapeHtml(doc.document_number)} · ${escapeHtml(doc.organization || "Без организации")}</div><div class="saved-item-meta">${escapeHtml(doc.document_date || "Без даты")} · ${escapeHtml(doc.person_name || "Без имени")} · ${formatMoney(doc.total || 0)}</div></div><div class="saved-item-actions"><button class="open-document" type="button">Открыть</button><button class="delete-document" type="button">Удалить</button></div></div>`).join("");
+  const documents = [...savedDocuments].sort((a, b) => `${b.document_date || ""}T${b.document_number || ""}`.localeCompare(`${a.document_date || ""}T${a.document_number || ""}`));
+  list.innerHTML = documents.map((doc) => `<div class="saved-item" data-id="${doc.id}"><div class="saved-item-main"><div class="saved-item-title">${escapeHtml(doc.document_number)} · ${escapeHtml(doc.organization || "Без организации")}</div><div class="saved-item-meta">${escapeHtml(doc.document_date || "Без даты")} · ${escapeHtml(doc.person_name || "Без имени")}</div><div class="saved-item-metrics"><span>Начало: <strong>${formatMoney(doc.opening_balance)}</strong></span><span>Операции: <strong>${formatMoney(doc.total || 0)}</strong></span><span>Итог: <strong>${formatMoney(doc.ending_balance ?? documentEnding(doc))}</strong></span></div></div><div class="saved-item-actions"><button class="open-document" type="button">Открыть</button><button class="delete-document" type="button">Удалить</button></div></div>`).join("");
   list.querySelectorAll(".saved-item").forEach((item) => {
-    item.querySelector(".open-document").addEventListener("click", () => loadDocument(item.dataset.id));
+    item.querySelector(".open-document").addEventListener("click", () => openDocumentWindow(item.dataset.id));
     item.querySelector(".delete-document").addEventListener("click", () => deleteDocument(item.dataset.id));
   });
   refreshSuggestions();
+}
+
+function openDocumentWindow(id) {
+  const url = new URL(window.location.href);
+  url.searchParams.set("document", id);
+  const opened = window.open(url.toString(), "_blank");
+  if (!opened) showMessage("Браузер заблокировал новую вкладку. Разрешите всплывающие окна для сайта.");
 }
 
 async function loadDocuments() {
@@ -322,6 +330,11 @@ async function enterApp() {
   $("documentDate").value = today();
   await loadDocuments();
   update();
+  const requestedDocumentId = new URLSearchParams(window.location.search).get("document");
+  if (requestedDocumentId) {
+    await loadDocument(requestedDocumentId);
+    window.history.replaceState({}, "", window.location.pathname + window.location.hash);
+  }
 }
 
 function leaveApp() { $("authPanel").hidden = false; $("appContent").hidden = true; currentDocumentId = null; }
