@@ -147,6 +147,7 @@ input[readonly] { color: var(--muted); background: #f4f6f7; }
 .report-document-total strong, .report-organization-total strong { color: var(--ink); }
 .report-organization-total { padding: 14px 0 4px; border-top: 2px solid var(--ink); font-size: 14px; }
 .report-mode > :not(#reportPanel) { display: none !important; }
+.documents-mode > :not(#savedPanel) { display: none !important; }
 @media print {
   body.report-print .topbar, body.report-print .auth-panel, body.report-print .footer-note { display: none !important; }
   body.report-print #appContent > :not(#reportPanel) { display: none !important; }
